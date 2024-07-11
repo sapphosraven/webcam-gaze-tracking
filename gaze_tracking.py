@@ -117,12 +117,10 @@ class OverlayWindow:
 
     def update(self, x, y):
         hdc = win32gui.GetDC(self.hwnd)
-        # Specify a fixed size for the rectangle (adjust as needed)
-        rect = (x - 5, y - 5, x + 5, y + 5)
-        # Use red color for the rectangle (RGB format: Red = 255, Green = 0, Blue = 0)
-        win32gui.FillRect(hdc, rect, win32gui.CreateSolidBrush(win32api.RGB(255, 0, 0)))
+        rect = win32gui.GetClientRect(self.hwnd)
+        win32gui.FillRect(hdc, rect, win32gui.GetStockObject(win32con.BLACK_BRUSH))  # Clear the previous gaze pointer
+        win32gui.FillRect(hdc, (x-5, y-5, x+5, y+5), win32gui.GetStockObject(win32con.WHITE_BRUSH))  # Draw the new gaze pointer
         win32gui.ReleaseDC(self.hwnd, hdc)
-
 
 overlay = OverlayWindow()
 gaze_history = []
