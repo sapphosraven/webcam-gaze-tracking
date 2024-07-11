@@ -147,6 +147,7 @@ while True:
 
         # Calibration instructions
         if current_calibration_point < len(calibration_screen_points):
+            overlay.update(0,0)
             instruction = calibration_screen_points[current_calibration_point]
             cv2.putText(frame, f"Look at: {instruction}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
             if cv2.waitKey(1) & 0xFF == ord('c'):  # Press 'c' to capture calibration point
