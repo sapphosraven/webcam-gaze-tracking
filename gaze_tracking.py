@@ -15,12 +15,13 @@ predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
 
 # Calibration points and counter
 calibration_points = []
+calibration_instructions = ["Center", "Top Left", "Top Right", "Bottom Left", "Bottom Right"]
 calibration_screen_points = [
     (960, 540),  # Center
-    (0, 0),      # Top Left
-    (1920, 0),   # Top Right
-    (0, 1080),   # Bottom Left
-    (1920, 1080) # Bottom Right
+    (0, 0),  # Top Left
+    (1920, 0),  # Top Right
+    (0, 1080),  # Bottom Left
+    (1920, 1080)  # Bottom Right
 ]
 current_calibration_point = 0
 
@@ -116,11 +117,12 @@ class OverlayWindow:
 
     def update(self, x, y):
         hdc = win32gui.GetDC(self.hwnd)
-        # Specify a fixed size for the gaze pointer (adjust as needed)
+        # Specify a fixed size for the rectangle (adjust as needed)
         rect = (x - 5, y - 5, x + 5, y + 5)
-        # Use red color for the gaze pointer (RGB format: Red = 255, Green = 0, Blue = 0)
+        # Use red color for the rectangle (RGB format: Red = 255, Green = 0, Blue = 0)
         win32gui.FillRect(hdc, rect, win32gui.CreateSolidBrush(win32api.RGB(255, 0, 0)))
         win32gui.ReleaseDC(self.hwnd, hdc)
+
 
 overlay = OverlayWindow()
 gaze_history = []
@@ -147,7 +149,7 @@ while True:
 
         # Calibration instructions
         if current_calibration_point < len(calibration_screen_points):
-            instruction = calibration_instructions[current_calibration_point]
+            instruction = calibration_screen_points[current_calibration_point]
             cv2.putText(frame, f"Look at: {instruction}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
             if cv2.waitKey(1) & 0xFF == ord('c'):  # Press 'c' to capture calibration point
                 calibration_points.append((gaze_x, gaze_y))
@@ -159,8 +161,8 @@ while True:
             smoothed_coords = smooth_gaze(gaze_history)
             overlay.update(int(smoothed_coords[0]), int(smoothed_coords[1]))
 
-    # Display gaze pointer window
-    cv2.imshow("Gaze Tracker", np.zeros((1, 1), dtype=np.uint8))  # Dummy window to prevent UI freeze
+    # Display frame
+    cv2.imshow("Gaze Tracker", frame)
 
     # Exit on 'q' key press
     if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -172,3 +174,4 @@ cv2.destroyAllWindows()
 
 # Calibration data (you can use this for further analysis or mapping)
 print("Calibration points:", calibration_points)
+
