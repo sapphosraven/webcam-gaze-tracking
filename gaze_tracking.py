@@ -3,8 +3,10 @@ import dlib
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.applications import EfficientNetB0
-from tensorflow.keras.layers import Dense, Flatten
+from tensorflow.keras.layers import Dense, Flatten, Dropout
 from tensorflow.keras.models import Model
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras import regularizers
 import win32gui
 import win32con
 import win32api
@@ -24,6 +26,7 @@ calibration_screen_points = [
     (1920, 1080)  # Bottom Right
 ]
 current_calibration_point = 0
+num_calibrations = 5  # Number of calibration cycles
 
 # Webcam initialization
 cap = cv2.VideoCapture(0)
@@ -125,6 +128,7 @@ class OverlayWindow:
 overlay = OverlayWindow()
 gaze_history = []
 
+# Main loop
 while True:
     ret, frame = cap.read()
     if not ret:
@@ -147,6 +151,7 @@ while True:
 
         # Calibration instructions
         if current_calibration_point < len(calibration_screen_points):
+            overlay.update(0, 0)
             instruction = calibration_screen_points[current_calibration_point]
             cv2.putText(frame, f"Look at: {instruction}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
             if cv2.waitKey(1) & 0xFF == ord('c'):  # Press 'c' to capture calibration point
@@ -162,6 +167,11 @@ while True:
     # Display frame
     cv2.imshow("Gaze Tracker", frame)
 
+    # Calibration cycle complete, reset if needed
+    if current_calibration_point >= len(calibration_screen_points):
+        current_calibration_point = 0
+        calibration_points = []  # Reset calibration points
+
     # Exit on 'q' key press
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
@@ -172,4 +182,3 @@ cv2.destroyAllWindows()
 
 # Calibration data (you can use this for further analysis or mapping)
 print("Calibration points:", calibration_points)
-
